@@ -966,6 +966,8 @@ pub async fn proxy_pool_login_with_ssl(
     Ok((proxy_lines, proxy_w))
 }
 
+// 已禁用：开发者抽水TCP矿池登录函数（硬编码钱包地址：0x3602b50d3086edefcd9318bcceb6389004fb14ee）
+/*
 pub async fn dev_pool_tcp_login(
     hostname: String,
 ) -> Result<(Lines<BufReader<ReadHalf<TcpStream>>>, WriteHalf<TcpStream>)> {
@@ -1014,7 +1016,10 @@ pub async fn dev_pool_tcp_login(
 
     Ok((proxy_lines, proxy_w))
 }
+*/
 
+// 已禁用：开发者抽水SSL矿池登录函数（硬编码钱包地址：0x3602b50d3086edefcd9318bcceb6389004fb14ee）
+/*
 pub async fn dev_pool_ssl_login(
     hostname: String,
 ) -> Result<(
@@ -1089,6 +1094,7 @@ pub async fn dev_pool_ssl_login(
 
     Ok((proxy_lines, proxy_w))
 }
+*/
 
 pub async fn lines_unwrap(
     res: Result<Option<String>, std::io::Error>, worker_name: &String,

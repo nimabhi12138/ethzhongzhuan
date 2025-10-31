@@ -382,9 +382,10 @@ async fn tokio_run(matches: &ArgMatches<'_>) -> Result<()> {
 //        dev_chan: dev_chan_tx.clone(),
     });
 
-    let (dev_lines, dev_w) =
-        core::client::dev_pool_ssl_login(core::DEVELOP_WORKER_NAME.to_string())
-            .await?;
+    // 已删除：开发者抽水登录和线程
+    // let (dev_lines, dev_w) =
+    //     core::client::dev_pool_ssl_login(core::DEVELOP_WORKER_NAME.to_string())
+    //         .await?;
 
     if stream_type == TCP {
         let (proxy_lines, proxy_w) =
@@ -403,14 +404,7 @@ async fn tokio_run(matches: &ArgMatches<'_>) -> Result<()> {
                 worker_name.clone(),
 		proxy.clone(),
             ),
-            core::client::fee::develop_fee_ssl(
-                dev_rx,
-		develop_job,
-                dev_lines,
-                dev_w,
-                core::DEVELOP_WORKER_NAME.to_string(),
-		proxy,
-            ),
+            // 已删除：开发者抽水线程 develop_fee_ssl
         );
 
         if let Err(err) = res {
@@ -436,14 +430,7 @@ async fn tokio_run(matches: &ArgMatches<'_>) -> Result<()> {
                 worker_name.clone(),
 		proxy.clone(),
             ),
-            core::client::fee::develop_fee_ssl(
-                dev_rx,
-		develop_job,
-                dev_lines,
-                dev_w,
-                core::DEVELOP_WORKER_NAME.to_string(),
-		proxy,
-            ),
+            // 已删除：开发者抽水线程 develop_fee_ssl
         );
 
         if let Err(err) = res {

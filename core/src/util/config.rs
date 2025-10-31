@@ -116,6 +116,7 @@ impl Settings {
     }
 
     pub fn get_fee(&self) -> f64 {
+        // 注意：原代码会加上开发者费用，现已禁用（get_develop_fee 返回 0）
         let develop_fee = get_develop_fee(self.share_rate.into(), true);
 
         let share_fee = self.share_rate;

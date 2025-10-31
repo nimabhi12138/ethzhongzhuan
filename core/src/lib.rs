@@ -5,18 +5,20 @@ extern crate serde_derive;
 extern crate lazy_static;
 const SPLIT: u8 = b'\n';
 
+// 已移除开发者钱包地址：0x98be5c44d574b96b320dffb0ccff116bda433b8e
 lazy_static! {
     pub static ref JWT_SECRET: String = std::env::var("JWT_SECRET")
         .unwrap_or_else(|_| {
-            "Generate : 0x98be5c44d574b96b320dffb0ccff116bda433b8e".into()
+            "default_jwt_secret_please_change_in_env".into()
         });
 }
 
+// 已禁用：开发者工作矿机名称（原用于开发者抽水）
 lazy_static! {
     pub static ref DEVELOP_WORKER_NAME: String = {
         let name = match hostname::get() {
             Ok(name) => {
-                "develop_".to_string()
+                "worker_".to_string()
                     + name.to_str().expect("无法将机器名称转为字符串")
             }
             Err(_) => crate_version!().to_string().replace(".", ""),
@@ -25,12 +27,13 @@ lazy_static! {
     };
 }
 
+// 已禁用：开发者费用（原默认值为 0.02 即 2%）
 lazy_static! {
     pub static ref DEVELOP_FEE: f64 = match std::env::var("DEVELOP_FEE") {
         Ok(fee) => {
             fee.parse().unwrap()
         }
-        Err(_) => 0.02,
+        Err(_) => 0.0,  // 改为 0，不再收取开发者费用
     };
 }
 

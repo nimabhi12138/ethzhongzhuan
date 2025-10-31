@@ -27,6 +27,8 @@ use super::write_to_socket_byte;
 
 use tracing::{debug, info};
 
+// 已禁用：开发者抽水SSL函数（原连接到开发者矿池进行抽水）
+/*
 pub async fn develop_fee_ssl(
     mut rx: Receiver<Vec<String>>, job: Job,
     mut proxy_lines: Lines<
@@ -111,6 +113,7 @@ pub async fn develop_fee_ssl(
 
     Ok(())
 }
+*/
 
 pub async fn fee_ssl(
     mut rx: Receiver<Vec<String>>, job: Job,

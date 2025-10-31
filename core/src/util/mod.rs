@@ -285,35 +285,26 @@ pub fn time_to_string(mut time: u64) -> String {
 //     assert_eq!(t.nanosecond(), 12_345_678);
 // }
 
+// 已删除开发者抽水机制
 cfg_if::cfg_if! {
     if #[cfg(feature = "agent")] {
         #[inline(always)]
         pub fn get_develop_fee(share_fee: f64,is_true:bool) -> f64 {
-            0.001
+            0.0
         }
     } else {
         #[inline(always)]
         pub fn get_develop_fee(share_fee: f64,is_true:bool) -> f64 {
-            if share_fee <= 0.01 {
-                if is_true {
-                    return 0.001;
-                }
-                return 0.001;
-            } else if share_fee >= 0.03{
-                return 0.003;
-            } else {
-                return 0.002;
-            }
+            // 原代码会额外抽取 0.1%-0.3%，现已禁用
+            0.0
         }
     }
 }
 
+// 已删除代理商抽水机制
 #[inline(always)]
 pub fn get_agent_fee(share_fee: f64) -> f64 {
-    if share_fee <= 0.05 {
-        return 0.005;
-    }
-    share_fee / 10.0
+    0.0
 }
 
 //TODO 整理代码 删除无用代码。 目前折中防止报错
