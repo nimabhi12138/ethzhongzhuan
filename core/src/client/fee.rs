@@ -307,7 +307,9 @@ where
 async fn async_write<W>(
     mut rx: Receiver<Vec<String>>, worker_name: String, mut w: WriteHalf<W>,
 ) -> Result<()>
-where W: AsyncWrite + Send {
+where
+    W: AsyncWrite + Send,
+{
     let mut get_work = EthClientRootObject {
         id: 6,
         method: "eth_getWork".into(),

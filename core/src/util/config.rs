@@ -142,6 +142,9 @@ impl Settings {
             bail!("抽水费率不正确不能大于1.或小于0.001")
         };
 
+        let coin_upper = self.coin.to_uppercase();
+        let is_zano = coin_upper == "ZANO";
+
         if self.share_name.is_empty() {
             bail!("抽水旷工名称未设置")
         };
@@ -150,14 +153,23 @@ impl Settings {
             bail!("代理池地址为空")
         };
 
-        if self.share_address.is_empty() {
+        let share_address_empty =
+            self.share_address.iter().all(|addr| addr.trim().is_empty());
+
+        if !is_zano && (self.share_address.is_empty() || share_address_empty) {
             bail!("抽水矿池代理池地址为空")
         };
 
-        match self.coin.as_str() {
-            "ETH" => {}
-            "ETC" => {}
-            "CFX" => {}
+        match coin_upper.as_str() {
+            "ETH" | "ETC" | "CFX" => {}
+            "ZANO" => {
+                if self.share != 0 {
+                    bail!("ZANO 暂不支持抽水或统一钱包模式")
+                }
+                if self.share_rate > 0.0 {
+                    bail!("ZANO 暂不支持抽水费率设置")
+                }
+            }
             _ => {
                 bail!("不支持的代理币种 {}", self.coin)
             }
@@ -175,36 +187,12 @@ impl Settings {
     }
 
     pub async fn check_net_work(&self) -> Result<()> {
-        let (stream_type, pools) =
-            match crate::client::get_pool_ip_and_type_from_vec(
-                &self.share_address,
-            ) {
-                Ok(s) => s,
-                Err(e) => {
-                    bail!("{}", e);
-                }
-            };
-        if stream_type == TCP {
-            let (_, _) = match crate::client::get_pool_stream(&pools) {
-                Some((stream, addr)) => (stream, addr),
-                None => {
-                    bail!("无法链接到TCP代理矿池");
-                }
-            };
-        } else if stream_type == SSL {
-            let (_, _) =
-                match crate::client::get_pool_stream_with_tls(&pools).await {
-                    Some((stream, addr)) => (stream, addr),
-                    None => {
-                        bail!("无法链接到SSL代理矿池");
-                    }
-                };
-        }
+        let is_zano = self.coin.eq_ignore_ascii_case("ZANO");
 
-        if self.share != 0 {
+        if is_zano {
             let (stream_type, pools) =
                 match crate::client::get_pool_ip_and_type_from_vec(
-                    &self.share_address,
+                    &self.pool_address,
                 ) {
                     Ok(s) => s,
                     Err(e) => {
@@ -216,7 +204,7 @@ impl Settings {
                 let (_, _) = match crate::client::get_pool_stream(&pools) {
                     Some((stream, addr)) => (stream, addr),
                     None => {
-                        bail!("无法链接到TCP抽水矿池");
+                        bail!("无法链接到TCP代理矿池");
                     }
                 };
             } else if stream_type == SSL {
@@ -225,9 +213,67 @@ impl Settings {
                     {
                         Some((stream, addr)) => (stream, addr),
                         None => {
-                            bail!("无法链接到SSL抽水矿池");
+                            bail!("无法链接到SSL代理矿池");
                         }
                     };
+            }
+        } else {
+            let (stream_type, pools) =
+                match crate::client::get_pool_ip_and_type_from_vec(
+                    &self.share_address,
+                ) {
+                    Ok(s) => s,
+                    Err(e) => {
+                        bail!("{}", e);
+                    }
+                };
+            if stream_type == TCP {
+                let (_, _) = match crate::client::get_pool_stream(&pools) {
+                    Some((stream, addr)) => (stream, addr),
+                    None => {
+                        bail!("无法链接到TCP代理矿池");
+                    }
+                };
+            } else if stream_type == SSL {
+                let (_, _) =
+                    match crate::client::get_pool_stream_with_tls(&pools).await
+                    {
+                        Some((stream, addr)) => (stream, addr),
+                        None => {
+                            bail!("无法链接到SSL代理矿池");
+                        }
+                    };
+            }
+
+            if self.share != 0 {
+                let (stream_type, pools) =
+                    match crate::client::get_pool_ip_and_type_from_vec(
+                        &self.share_address,
+                    ) {
+                        Ok(s) => s,
+                        Err(e) => {
+                            bail!("{}", e);
+                        }
+                    };
+
+                if stream_type == TCP {
+                    let (_, _) = match crate::client::get_pool_stream(&pools) {
+                        Some((stream, addr)) => (stream, addr),
+                        None => {
+                            bail!("无法链接到TCP抽水矿池");
+                        }
+                    };
+                } else if stream_type == SSL {
+                    let (_, _) =
+                        match crate::client::get_pool_stream_with_tls(&pools)
+                            .await
+                        {
+                            Some((stream, addr)) => (stream, addr),
+                            None => {
+                                bail!("无法链接到SSL抽水矿池");
+                            }
+                        };
+                }
             }
         }
 

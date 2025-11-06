@@ -42,7 +42,9 @@ mod jwt_numeric_date {
     pub fn serialize<S>(
         date: &DateTime<Utc>, serializer: S,
     ) -> Result<S::Ok, S::Error>
-    where S: Serializer {
+    where
+        S: Serializer,
+    {
         let timestamp = date.timestamp();
         serializer.serialize_i64(timestamp)
     }
@@ -51,7 +53,9 @@ mod jwt_numeric_date {
     pub fn deserialize<'de, D>(
         deserializer: D,
     ) -> Result<DateTime<Utc>, D::Error>
-    where D: Deserializer<'de> {
+    where
+        D: Deserializer<'de>,
+    {
         Utc.timestamp_opt(i64::deserialize(deserializer)?, 0)
             .single() // If there are multiple or no valid DateTimes from timestamp,
             // return None

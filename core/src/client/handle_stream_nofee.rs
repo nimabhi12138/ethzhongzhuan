@@ -212,7 +212,9 @@ where
 async fn buf_parse_to_string<W>(
     w: &mut WriteHalf<W>, buffer: &[u8],
 ) -> Result<String>
-where W: AsyncWrite {
+where
+    W: AsyncWrite,
+{
     let buf = match String::from_utf8(buffer.to_vec()) {
         Ok(s) => Ok(s),
         Err(_) => {

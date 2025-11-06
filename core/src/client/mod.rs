@@ -9,9 +9,8 @@ pub mod pools;
 pub mod tcp;
 pub mod tls;
 
-
-use tokio::sync::broadcast::{Receiver,error::TryRecvError};
-use anyhow::{anyhow,bail,Result};
+use anyhow::{anyhow, bail, Result};
+use tokio::sync::broadcast::{error::TryRecvError, Receiver};
 
 use native_tls::TlsConnector;
 use rand::prelude::SliceRandom;
@@ -26,7 +25,6 @@ use std::{
 use tokio_native_tls::TlsStream;
 
 use tracing::debug;
-
 
 use tokio::{
     io::{
@@ -392,7 +390,9 @@ where
 pub async fn write_to_socket_string<W>(
     w: &mut WriteHalf<W>, rpc: &str, worker: &String,
 ) -> Result<()>
-where W: AsyncWrite {
+where
+    W: AsyncWrite,
+{
     let mut rpc = rpc.as_bytes().to_vec();
     rpc.push(b'\n');
 
@@ -415,7 +415,9 @@ where W: AsyncWrite {
 pub async fn write_to_socket_byte<W>(
     w: &mut WriteHalf<W>, mut rpc: Vec<u8>, worker: &String,
 ) -> Result<()>
-where W: AsyncWrite {
+where
+    W: AsyncWrite,
+{
     rpc.push(b'\n');
     let write_len = w.write(&rpc).await?;
     if write_len == 0 {
@@ -430,7 +432,9 @@ where W: AsyncWrite {
 pub async fn self_write_socket_byte<W>(
     w: &mut WriteHalf<W>, mut rpc: Vec<u8>, worker: &String,
 ) -> Result<()>
-where W: AsyncWrite {
+where
+    W: AsyncWrite,
+{
     rpc.push(SPLIT);
     let write_len = w.write(&rpc).await?;
     if write_len == 0 {
@@ -533,6 +537,11 @@ where
     R: AsyncRead,
     W: AsyncWrite,
 {
+    let coin_upper = {
+        let cfg = proxy.config.read().await;
+        cfg.coin.to_uppercase()
+    };
+
     if stream_type == TCP {
         let (outbound, _) = match crate::client::get_pool_stream(&pools) {
             Some((stream, addr)) => (stream, addr),
@@ -546,16 +555,29 @@ where
         let (pool_r, pool_w) = tokio::io::split(stream);
         let pool_r = tokio::io::BufReader::new(pool_r);
 
-        handle_stream::handle_stream(
-            worker,
-            worker_r,
-            worker_w,
-            pool_r,
-            pool_w,
-            proxy,
-            is_encrypted,
-        )
-        .await
+        if coin_upper == "ZANO" {
+            handle_stream_zano::handle_stream_zano(
+                worker,
+                worker_r,
+                worker_w,
+                pool_r,
+                pool_w,
+                proxy,
+                is_encrypted,
+            )
+            .await
+        } else {
+            handle_stream::handle_stream(
+                worker,
+                worker_r,
+                worker_w,
+                pool_r,
+                pool_w,
+                proxy,
+                is_encrypted,
+            )
+            .await
+        }
     } else if stream_type == SSL {
         let (stream, _) =
             match crate::client::get_pool_stream_with_tls(&pools).await {
@@ -568,16 +590,29 @@ where
         let (pool_r, pool_w) = tokio::io::split(stream);
         let pool_r = tokio::io::BufReader::new(pool_r);
 
-        handle_stream::handle_stream(
-            worker,
-            worker_r,
-            worker_w,
-            pool_r,
-            pool_w,
-            proxy,
-            is_encrypted,
-        )
-        .await
+        if coin_upper == "ZANO" {
+            handle_stream_zano::handle_stream_zano(
+                worker,
+                worker_r,
+                worker_w,
+                pool_r,
+                pool_w,
+                proxy,
+                is_encrypted,
+            )
+            .await
+        } else {
+            handle_stream::handle_stream(
+                worker,
+                worker_r,
+                worker_w,
+                pool_r,
+                pool_w,
+                proxy,
+                is_encrypted,
+            )
+            .await
+        }
     } else {
         panic!("达到了无法达到的分支");
     }
@@ -1152,7 +1187,9 @@ where
 async fn buf_parse_to_string<W>(
     w: &mut WriteHalf<W>, buffer: &[u8],
 ) -> Result<String>
-where W: AsyncWrite {
+where
+    W: AsyncWrite,
+{
     let buf = match String::from_utf8(buffer.to_vec()) {
         Ok(s) => Ok(s),
         Err(_) => {
@@ -1191,7 +1228,9 @@ where
 pub async fn write_string<W>(
     _encrypt: bool, w: &mut WriteHalf<W>, rpc: &str, worker: &String,
 ) -> Result<()>
-where W: AsyncWrite {
+where
+    W: AsyncWrite,
+{
     // if encrypt {
     //     write_encrypt_socket_string(w, &rpc, &worker, key, iv).await
     // } else {
@@ -1207,7 +1246,9 @@ pub enum FEE {
 }
 
 fn recv<T>(tx: &mut Receiver<T>) -> Result<T>
-where T: std::clone::Clone {
+where
+    T: std::clone::Clone,
+{
     let res = match tx.try_recv() {
         Ok(t) => return Ok(t),
         Err(e) => match e {

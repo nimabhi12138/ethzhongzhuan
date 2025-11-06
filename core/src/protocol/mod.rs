@@ -2,6 +2,7 @@ pub mod eth_stratum;
 pub mod ethjson;
 pub mod rpc;
 pub mod stratum;
+pub mod zano;
 
 use num_enum::IntoPrimitive;
 use serde::{Deserialize, Serialize};
@@ -20,5 +21,6 @@ pub enum PROTOCOL {
     STRATUM,
     ETH,
     NICEHASHSTRATUM,
+    ZANO,
     KNOWN,
 }

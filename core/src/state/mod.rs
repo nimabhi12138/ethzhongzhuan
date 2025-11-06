@@ -130,10 +130,14 @@ impl Worker {
     }
 
     // 设置当前链接协议
-    pub fn set_protocol(&mut self, p: PROTOCOL) { self.protocol = p; }
+    pub fn set_protocol(&mut self, p: PROTOCOL) {
+        self.protocol = p;
+    }
 
     // 判断是否在线
-    pub fn is_online(&self) -> bool { self.online }
+    pub fn is_online(&self) -> bool {
+        self.online
+    }
 
     // 每十分钟清空份额调用方法
     pub fn clear_state(&mut self) {
@@ -188,7 +192,9 @@ impl Worker {
     }
 
     pub fn submit_hashrate<T>(&mut self, rpc: &T) -> bool
-    where T: crate::protocol::rpc::eth::ClientRpc {
+    where
+        T: crate::protocol::rpc::eth::ClientRpc,
+    {
         self.hash = rpc.get_submit_hashrate();
         true
     }

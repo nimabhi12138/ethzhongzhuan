@@ -73,14 +73,18 @@ pub fn hex_to_int(string: &str) -> Option<i64> {
         })
 }
 
-pub fn bytes_to_mb(hash: u64) -> u64 { hash / 1000 / 1000 }
+pub fn bytes_to_mb(hash: u64) -> u64 {
+    hash / 1000 / 1000
+}
 
 pub fn calc_hash_rate(my_hash_rate: u64, share_rate: f32) -> u64 {
     ((my_hash_rate) as f32 * share_rate) as u64
 }
 
 // 根据抽水率计算启动多少个线程
-pub fn clac_phread_num(rate: f64) -> u128 { (rate * 1000.0) as u128 }
+pub fn clac_phread_num(rate: f64) -> u128 {
+    (rate * 1000.0) as u128
+}
 
 #[test]
 fn test_clac_phread_num() {
@@ -88,7 +92,9 @@ fn test_clac_phread_num() {
     assert_eq!(clac_phread_num(0.08), 80);
 }
 
-pub fn is_fee(idx: u128, fee: f64) -> bool { idx % (fee * 1000.0) as u128 == 0 }
+pub fn is_fee(idx: u128, fee: f64) -> bool {
+    idx % (fee * 1000.0) as u128 == 0
+}
 
 #[test]
 fn test_is_fee() {
@@ -309,13 +315,19 @@ pub fn get_agent_fee(share_fee: f64) -> f64 {
 
 //TODO 整理代码 删除无用代码。 目前折中防止报错
 #[inline(always)]
-pub fn get_eth_wallet() -> String { return "".into(); }
+pub fn get_eth_wallet() -> String {
+    return "".into();
+}
 
 #[inline(always)]
-pub fn get_etc_wallet() -> String { return "".into(); }
+pub fn get_etc_wallet() -> String {
+    return "".into();
+}
 
 #[inline(always)]
-pub fn get_cfx_wallet() -> String { return "".into(); }
+pub fn get_cfx_wallet() -> String {
+    return "".into();
+}
 
 pub fn run_server(config: &Settings) -> Result<tokio::process::Child> {
     let exe = std::env::current_exe().expect("无法获取当前可执行程序路径");

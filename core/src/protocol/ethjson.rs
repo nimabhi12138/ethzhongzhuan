@@ -73,9 +73,13 @@ impl EthClientObject for EthClientRootObject {
         true
     }
 
-    fn get_params(&self) -> Vec<String> { self.params.clone() }
+    fn get_params(&self) -> Vec<String> {
+        self.params.clone()
+    }
 
-    fn get_id(&self) -> u64 { self.id }
+    fn get_id(&self) -> u64 {
+        self.id
+    }
 
     fn get_job_id(&self) -> Option<String> {
         match self.params.get(1) {
@@ -91,7 +95,9 @@ impl EthClientObject for EthClientRootObject {
         }
     }
 
-    fn get_worker_name(&self) -> String { "Default".to_string() }
+    fn get_worker_name(&self) -> String {
+        "Default".to_string()
+    }
 
     fn get_submit_hashrate(&self) -> u64 {
         if let Some(hashrate) = self.params.get(0) {
@@ -114,7 +120,9 @@ impl EthClientObject for EthClientRootObject {
         true
     }
 
-    fn get_method(&self) -> String { self.method.clone() }
+    fn get_method(&self) -> String {
+        self.method.clone()
+    }
 
     fn to_vec(&mut self) -> Result<Vec<u8>> {
         let rpc = serde_json::to_vec(&self)?;
@@ -150,9 +158,13 @@ impl EthClientObject for EthClientWorkerObject {
         true
     }
 
-    fn get_id(&self) -> u64 { self.id }
+    fn get_id(&self) -> u64 {
+        self.id
+    }
 
-    fn get_params(&self) -> Vec<String> { self.params.clone() }
+    fn get_params(&self) -> Vec<String> {
+        self.params.clone()
+    }
 
     fn get_job_id(&self) -> Option<String> {
         match self.params.get(1) {
@@ -168,7 +180,9 @@ impl EthClientObject for EthClientWorkerObject {
         }
     }
 
-    fn get_worker_name(&self) -> String { self.worker.clone() }
+    fn get_worker_name(&self) -> String {
+        self.worker.clone()
+    }
 
     fn get_submit_hashrate(&self) -> u64 {
         if let Some(hashrate) = self.params.get(0) {
@@ -190,7 +204,9 @@ impl EthClientObject for EthClientWorkerObject {
         true
     }
 
-    fn get_method(&self) -> String { self.method.clone() }
+    fn get_method(&self) -> String {
+        self.method.clone()
+    }
 
     fn to_vec(&mut self) -> Result<Vec<u8>> {
         let rpc = serde_json::to_vec(&self)?;

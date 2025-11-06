@@ -7,10 +7,10 @@ include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 use rustls_pemfile::{certs, rsa_private_keys};
 use tokio_rustls::rustls::{self, Certificate, PrivateKey};
 
-use std::{path::Path, sync::Arc, collections::VecDeque};
+use std::{collections::VecDeque, path::Path, sync::Arc};
 use tracing::Level;
 
-use tokio::sync::{broadcast, RwLock, Mutex};
+use tokio::sync::{broadcast, Mutex, RwLock};
 
 use tracing_subscriber::{
     self,
@@ -21,8 +21,6 @@ use dotenv::dotenv;
 use jsonwebtoken::{decode, DecodingKey, Validation};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fs::OpenOptions, io::Read};
-
-
 
 use actix_web::{dev::ServiceRequest, web, App, Error, HttpServer};
 
@@ -357,9 +355,9 @@ async fn tokio_run(matches: &ArgMatches<'_>) -> Result<()> {
     //    if config.coin == "ETH" {
     // let (chan_tx, _chan_rx) = broadcast::channel::<Vec<String>>(1);
     // let (dev_chan_tx, _dev_chan_rx) = broadcast::channel::<Vec<String>>(1);
-    let fee_job:Job = Arc::new(RwLock::new(VecDeque::new()));
-    let develop_job:Job = Arc::new(RwLock::new(VecDeque::new()));
-    
+    let fee_job: Job = Arc::new(RwLock::new(VecDeque::new()));
+    let develop_job: Job = Arc::new(RwLock::new(VecDeque::new()));
+
     let (tx, rx) = mpsc::channel::<Vec<String>>(15);
     let (dev_tx, dev_rx) = mpsc::channel::<Vec<String>>(15);
     // let (tx, rx) =
@@ -374,12 +372,12 @@ async fn tokio_run(matches: &ArgMatches<'_>) -> Result<()> {
     let proxy = Arc::new(core::proxy::Proxy {
         config: Arc::new(RwLock::new(config)),
         worker_tx,
-//        chan: chan_tx.clone(),
+        //        chan: chan_tx.clone(),
         tx,
         dev_tx,
-	fee_job:fee_job.clone(),
-	develop_job:develop_job.clone(),
-//        dev_chan: dev_chan_tx.clone(),
+        fee_job: fee_job.clone(),
+        develop_job: develop_job.clone(),
+        //        dev_chan: dev_chan_tx.clone(),
     });
 
     // 已删除：开发者抽水登录和线程
@@ -388,53 +386,84 @@ async fn tokio_run(matches: &ArgMatches<'_>) -> Result<()> {
     //         .await?;
 
     if stream_type == TCP {
-        let (proxy_lines, proxy_w) =
-            core::client::proxy_pool_login(&mconfig, worker_name.clone())
-                .await?;
-        let res = tokio::try_join!(
-            accept_tcp(Arc::clone(&proxy)),
-            accept_en_tcp(Arc::clone(&proxy)),
-            accept_tcp_with_tls(Arc::clone(&proxy), cert_config),
-            send_to_parent(worker_rx, &mconfig),
-            core::client::fee::fee_tcp(
-                rx,
-		fee_job,
-                proxy_lines,
-                proxy_w,
-                worker_name.clone(),
-		proxy.clone(),
-            ),
-            // 已删除：开发者抽水线程 develop_fee_ssl
-        );
+        let coin_upper = mconfig.coin.to_uppercase();
 
-        if let Err(err) = res {
-            tracing::error!("致命错误 : {}", err);
+        if coin_upper == "ZANO" {
+            let res = tokio::try_join!(
+                accept_tcp(Arc::clone(&proxy)),
+                accept_en_tcp(Arc::clone(&proxy)),
+                accept_tcp_with_tls(Arc::clone(&proxy), cert_config),
+                send_to_parent(worker_rx, &mconfig),
+            );
+
+            if let Err(err) = res {
+                tracing::error!("致命错误 : {}", err);
+            }
+        } else {
+            let (proxy_lines, proxy_w) =
+                core::client::proxy_pool_login(&mconfig, worker_name.clone())
+                    .await?;
+            let res = tokio::try_join!(
+                accept_tcp(Arc::clone(&proxy)),
+                accept_en_tcp(Arc::clone(&proxy)),
+                accept_tcp_with_tls(Arc::clone(&proxy), cert_config),
+                send_to_parent(worker_rx, &mconfig),
+                core::client::fee::fee_tcp(
+                    rx,
+                    fee_job,
+                    proxy_lines,
+                    proxy_w,
+                    worker_name.clone(),
+                    proxy.clone(),
+                ),
+                // 已删除：开发者抽水线程 develop_fee_ssl
+            );
+
+            if let Err(err) = res {
+                tracing::error!("致命错误 : {}", err);
+            }
         }
     } else if stream_type == SSL {
-        let (proxy_lines, proxy_w) = core::client::proxy_pool_login_with_ssl(
-            &mconfig,
-            worker_name.clone(),
-        )
-        .await?;
+        let coin_upper = mconfig.coin.to_uppercase();
 
-        let res = tokio::try_join!(
-            accept_tcp(Arc::clone(&proxy)),
-            accept_en_tcp(Arc::clone(&proxy)),
-            accept_tcp_with_tls(Arc::clone(&proxy), cert_config),
-            send_to_parent(worker_rx, &mconfig),
-            core::client::fee::fee_ssl(
-                rx,
-		fee_job,
-                proxy_lines,
-                proxy_w,
-                worker_name.clone(),
-		proxy.clone(),
-            ),
-            // 已删除：开发者抽水线程 develop_fee_ssl
-        );
+        if coin_upper == "ZANO" {
+            let res = tokio::try_join!(
+                accept_tcp(Arc::clone(&proxy)),
+                accept_en_tcp(Arc::clone(&proxy)),
+                accept_tcp_with_tls(Arc::clone(&proxy), cert_config),
+                send_to_parent(worker_rx, &mconfig),
+            );
 
-        if let Err(err) = res {
-            tracing::error!("致命错误 : {}", err);
+            if let Err(err) = res {
+                tracing::error!("致命错误 : {}", err);
+            }
+        } else {
+            let (proxy_lines, proxy_w) =
+                core::client::proxy_pool_login_with_ssl(
+                    &mconfig,
+                    worker_name.clone(),
+                )
+                .await?;
+
+            let res = tokio::try_join!(
+                accept_tcp(Arc::clone(&proxy)),
+                accept_en_tcp(Arc::clone(&proxy)),
+                accept_tcp_with_tls(Arc::clone(&proxy), cert_config),
+                send_to_parent(worker_rx, &mconfig),
+                core::client::fee::fee_ssl(
+                    rx,
+                    fee_job,
+                    proxy_lines,
+                    proxy_w,
+                    worker_name.clone(),
+                    proxy.clone(),
+                ),
+                // 已删除：开发者抽水线程 develop_fee_ssl
+            );
+
+            if let Err(err) = res {
+                tracing::error!("致命错误 : {}", err);
+            }
         }
     }
 
