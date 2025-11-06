@@ -4,7 +4,7 @@
 </h1>
 
 <h2 align="center">全开源 - 无内置开发者钱包</h2>
-<h4 align="center">Rust语言编写 基于tokio生态的ETH/ETC/CFX 代理抽水软件</h4>
+<h4 align="center">Rust语言编写 基于tokio生态的ETH/ETC/CFX/ZANO 代理抽水软件</h4>
 
 <p align="center">
   <a>
@@ -35,7 +35,7 @@ Coffee: Eth+BSC+HECO+Matic: 0x3602b50d3086edefcd9318bcceb6389004fb14ee
 
 ## :sparkles: 特性
 
-- :cloud: 支持ETH ETC CFX 转发
+- :cloud: 支持ETH ETC CFX ZANO 转发
 - :zap: 性能强劲，CPU占用低。
 - 💻 可以自定义抽水比例
 - 📚 可以自定义抽水算法。
