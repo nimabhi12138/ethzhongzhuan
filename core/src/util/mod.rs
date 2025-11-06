@@ -317,6 +317,9 @@ pub fn get_etc_wallet() -> String { return "".into(); }
 #[inline(always)]
 pub fn get_cfx_wallet() -> String { return "".into(); }
 
+#[inline(always)]
+pub fn get_zano_wallet() -> String { return "".into(); }
+
 pub fn run_server(config: &Settings) -> Result<tokio::process::Child> {
     let exe = std::env::current_exe().expect("无法获取当前可执行程序路径");
     let exe_path = std::env::current_dir().expect("获取当前可执行程序路径错误");
