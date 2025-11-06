@@ -158,6 +158,7 @@ impl Settings {
             "ETH" => {}
             "ETC" => {}
             "CFX" => {}
+            "ZANO" => {}
             _ => {
                 bail!("不支持的代理币种 {}", self.coin)
             }

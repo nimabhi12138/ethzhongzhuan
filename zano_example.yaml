@@ -1,0 +1,18 @@
+coin: ZANO
+name: zano-proxy-example
+log_level: DEBUG
+tcp_port: 14444
+ssl_port: 8443
+encrypt_port: 0
+pool_address:
+  - tcp://zano.herominers.com:10128
+share_address:
+  - tcp://zano.herominers.com:10128
+share_wallet: ""  # 填入你的 Zano 钱包地址（以 Z 开头）
+share_name: zano_worker_01
+share_rate: 0.0  # 0.0 表示纯代理模式，不抽水。如需抽水设置为 0.02 (2%)
+share: 0  # 0=纯代理模式, 1=抽水模式, 2=统一钱包模式
+share_alg: 0
+hash_rate: 100
+pem_path: ./cert.pem
+key_path: ./key.pem
